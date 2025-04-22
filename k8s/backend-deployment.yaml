@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 3  # Number of replicas for scaling
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: backend-image:latest  # Replace with the actual backend Docker image
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://user:password@db-service:5432/auth_db"  # Database service name in Kubernetes
+        - name: JWT_SECRET
+          value: "your_jwt_secret_key"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 5000  # Exposed backend port
+      targetPort: 5000
+  type: ClusterIP  # Internal communication within the Kubernetes cluster
